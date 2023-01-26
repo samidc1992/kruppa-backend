@@ -1,5 +1,5 @@
 const http = require('http');
-const { createApp } = require('./app');
+const { createApp } = require('./cleanArchApp');
 
 const main = async () => {
     const app = await createApp();
