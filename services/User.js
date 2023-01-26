@@ -35,16 +35,51 @@ const signin = async (email, password) => {
     
     if (user && bcrypt.compareSync(password, existingUser.hash)) {
         return user;
-    } ;
+    };
 };
 
 const completeProfile = async (token, gender, photo, birthDate, description, favoriteSports) => {
+
     const updatedUser = await UserEntity.updateUserByToken(token, gender, photo, birthDate, description, favoriteSports);
     return updatedUser;
+};
+
+const joinGroup = async (token, group_id, status) => {
+
+    const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+
+    if (!userData) {
+        const joinGroupUpdateInformation = await UserEntity.addUserGroupSubscription(token, group_id, status);
+        return joinGroupUpdateInformation;
+    };
+};
+
+const leaveGroup = async (token, group_id) => {
+
+    const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+
+    if (userData) {
+        const joinGroupUpdateInformation = await UserEntity.removeUserGroupSubscription(token, group_id);
+        return joinGroupUpdateInformation;
+    };
+};
+
+const getUserGroupsInformation = async (token) => {
+    const user = await UserEntity.findUserByToken(token);
+    return user;
+};
+
+const getUserGroupStatus = async (token, group_id) => {
+    const user = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+    return user;
 }
 
 module.exports = {
     signup,
     signin,
-    completeProfile
-}
+    completeProfile,
+    joinGroup,
+    leaveGroup,
+    getUserGroupsInformation,
+    getUserGroupStatus
+};
