@@ -109,7 +109,7 @@ router.put('/leave-group', async (req, res) => {
     return;
   }
 
-  res.json({ result: false, error: 'User was not in the group.' });
+  res.json({ result: false, error: 'User was not subscribed to the group.' });
 });
 
 router.post('/groups', async (req, res) => {
@@ -128,7 +128,7 @@ router.post('/groups', async (req, res) => {
     return;
   }
 
-  res.json({ result: false, error: 'Invalid token.' });
+  res.json({ result: false, error: 'User not found.' });
 });
 
 router.post('/join-status', async (req, res) => {
@@ -141,7 +141,7 @@ router.post('/join-status', async (req, res) => {
   };
 
   const user = await UserService.getUserGroupStatus(token, group_id);
-  console.log(user)
+
   if (user) {
     res.json({ result: false, message: 'User already joined this group.' });
     return;
