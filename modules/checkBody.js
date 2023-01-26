@@ -6,7 +6,6 @@ function checkBody(body, keys) {
         isValid = false;
       }
     }
-  
     return isValid;
   }
   

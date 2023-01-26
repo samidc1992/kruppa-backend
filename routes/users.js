@@ -1,105 +1,75 @@
 var express = require('express');
 var router = express.Router();
 const mongoose = require('mongoose');
-const User = require('../models/users');
-const Group = require('../models/groups');
-const { checkBody } = require('../modules/checkBody');
-const uid2 = require('uid2');
 const bcrypt = require('bcryptjs');
 const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
+const User = require('../models/users');
+const UserService = require('../services/User');
+const { checkBody } = require('../modules/checkBody');
 
+router.post('/signup', async (req, res) => {
 
-router.post('/signup', (req, res) => {
-
+  const { username, email, password } = req.body;
   const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  // Check if all fiels are filled out
+  
   if (!checkBody(req.body, ['username', 'email', 'password']) || !EMAIL_REGEX.test(req.body.email)) {
-    res.json({ result: false, error: 'Missing or empty fields' });
+    res.json({ result: false, error: 'Missing or empty fields.' });
     return;
-  }
-  // Check if the user has not already been registered
-  User.findOne({ username: req.body.username, email: req.body.email }).then(data => {
-    if (data === null) {
-      const hash = bcrypt.hashSync(req.body.password, 10);
-      const newUser = new User({
-        username: req.body.username,
-        gender: null,
-        email: req.body.email,
-        hash: hash,
-        photo: null,
-        birthDate: null,
-        description: null,
-        favoriteSports: [],
-        registrations: [],
-        token: uid2(32),
-      });
-      newUser.save().then(newDoc => {
-        res.json({ result: true, token: newDoc.token });
-      });
-    } else {
-      // User already exists in database
-      res.json({ result: false, error: 'User already exists' });
-    }
-  });
+  };
+
+  const insertedUser = await UserService.signup(username, email, password);
+
+  if (insertedUser) {
+    res.json({ result: true, token: insertedUser.token });
+    return;
+  };
+
+  res.json({ result: false, error: 'User already exists.' });
+
 });
 
-//Filling out the rest of user's information
-router.put('/signup', (req, res) => {
-  // Check if all fiels are filled out
-  if (!checkBody(req.body, ['gender', 'birthDate', 'description', 'token'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
-  }
+
+router.put('/signup', async (req, res) => {
+
   const { gender, photo, birthDate, description, favoriteSports, token } = req.body;
-  User.updateOne(
-    { token: token },
-    {
-      gender,
-      photo,
-      birthDate,
-      description,
-      // $push: { favoriteSports: { sport: req.body.sport, level: req.body.level } }
-      favoriteSports
-    }
-  ).then(() => {
-    res.json({ result: true })
-  });
+
+  if (!checkBody(req.body, ['gender', 'birthDate', 'description', 'token'])) {
+    res.json({ result: false, error: 'Missing or empty fields.' });
+    return;
+  };
+
+  const updatedUser = await UserService.completeProfile(token, gender, photo, birthDate, description, favoriteSports);
+
+  if(updatedUser.modifiedCount > 0) {
+    res.json({ result: true, message: 'Sucessfully updated user.' });
+    return
+  }
+
+  res.json({result: false, error: 'User token not found or no changes done by the user.'})
+
 });
 
-router.post('/signin', (req, res) => {
+router.post('/signin', async (req, res) => {
+
+  const { email, password } = req.body;
+
   if (!checkBody(req.body, ['email', 'password'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
+    res.json({ result: false, error: 'Missing or empty fields.' });
     return;
-  }
+  };
 
-  User.findOne({ email: req.body.email })
-    .then(data => {
-      if (data && bcrypt.compareSync(req.body.password, data.hash)) {
-        res.json({
-          result: true,
-          user: {
-            token: data.token,
-            username: data.username
-          }
-        });
-      } else {
-        res.json({ result: false, error: 'User not found or wrong password' });
-      };
-    });
-});
+  const user = await UserService.signin(email, password);
 
-router.post('/', (req, res) => {
-  if (!checkBody(req.body, ['token'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
+  if (user) {
+    res.json({ result: true, user: { token: user.token, username: user.username } });
     return;
-  }
-  // find the user which username is req.params
-  User.findOne({ username: { $regex: new RegExp(req.params.username, 'i') } }).then(data => {
-    res.json({ result: true, user: data });
-  });
+  } 
+
+  res.json({ result: false, error: 'User does not exist or incorrect password.' });
+
 });
 
 router.put('/join-group', (req, res) => {
@@ -136,8 +106,6 @@ router.put('/join-group', (req, res) => {
     }
   })
 });
-
-// upload profile picture
 
 router.post('/upload', async (req, res) => {
 
