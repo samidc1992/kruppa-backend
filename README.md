@@ -1,6 +1,6 @@
 # About Kruppa
 
-Kruppa is a mobile application to help sports fans finding and creating sports groups in their city and neighborhood. Kruppa was developed in an academic setting with the following constraints:  
+Kruppa is a mobile application to help sports fans find and create sports groups in their city and neighborhood. Kruppa was developed in an academic setting with the following constraints:  
   1. Limited resources: the entire application was developed in two weeks by three developers. 
   2. Technical Stack:  
     A. Front-end: React Native (with Expo) and Redux: https://github.com/samidc1992/kruppa-frontend  
