@@ -6,9 +6,10 @@ const User = require('../models/users');
 
 const signup = async (username, email, password) => {
 
-    const existingUser = await UserEntity.findUserByUsernameAndEmail(username, email);
+    const existingUserEmail = await UserEntity.findUserByEmail(email);
+    const existingUsername = await UserEntity.findUserByUsername(username);
  
-    if (existingUser === null) {
+    if (existingUserEmail === null && existingUsername === null) {
         const hash = bcrypt.hashSync(password, 10);
         const newUser = new User({
             username,
@@ -24,7 +25,6 @@ const signup = async (username, email, password) => {
         });
 
         const savedUser = await newUser.save();
-
         return savedUser;
     };
 };
@@ -33,7 +33,7 @@ const signin = async (email, password) => {
 
     const user = await UserEntity.findUserByEmail(email);
     
-    if (user && bcrypt.compareSync(password, existingUser.hash)) {
+    if (user && bcrypt.compareSync(password, user.hash)) {
         return user;
     };
 };

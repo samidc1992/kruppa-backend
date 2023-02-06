@@ -27,7 +27,7 @@ router.post('/signup', async (req, res) => {
     return;
   };
 
-  res.json({ result: false, error: 'User already exists.' });
+  res.json({ result: false, error: 'Username or email already exists.' });
 
 });
 
@@ -42,7 +42,7 @@ router.put('/signup', async (req, res) => {
   };
 
   const updatedUser = await UserService.completeProfile(token, gender, photo, birthDate, description, favoriteSports);
-
+  console.log(updatedUser)
   if(updatedUser.modifiedCount > 0) {
     res.json({ result: true, message: 'Sucessfully updated user.' });
     return
@@ -68,7 +68,7 @@ router.post('/signin', async (req, res) => {
     return;
   } 
 
-  res.json({ result: false, error: 'User does not exist or incorrect password.' });
+  res.json({ result: false, error: 'Invalid email or password.' });
 
 });
 

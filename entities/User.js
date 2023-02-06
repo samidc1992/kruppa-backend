@@ -5,6 +5,11 @@ const findUserByUsernameAndEmail = async (username, email) => {
     return user;
 };
 
+const findUserByUsername = async (username) => {
+  const user = await User.findOne({ username });
+  return user;
+};
+
 const findUserByEmail = async (email) => {
     const user = await User.findOne({ email });
     return user;
@@ -75,6 +80,7 @@ const removeUserGroupSubscription = async (token, group_id) => {
 
 module.exports = {
     findUserByUsernameAndEmail,
+    findUserByUsername,
     findUserByEmail,
     findUserByToken,
     updateUserByToken,
