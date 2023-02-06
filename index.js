@@ -6,4 +6,4 @@ const main = async () => {
     http.createServer(app).listen(3000);
 }
 main()
-    .then(() => console.log('App started'))
+.then(() => console.log('App started'))

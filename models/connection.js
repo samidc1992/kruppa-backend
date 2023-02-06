@@ -8,5 +8,11 @@ const connection = async() => {
         .catch(error => console.error(error));
 }
 
-module.exports = { connection };
+const disconnection = async() => {
+    await mongoose.disconnect()
+        .then(() => console.log('Database disconnected'))
+        .catch(error => console.error(error));
+};
+
+module.exports = { connection, disconnection };
 

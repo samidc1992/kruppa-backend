@@ -1,17 +1,13 @@
 var express = require('express');
 var router = express.Router();
-const Group = require('../models/groups');
-const Sport = require('../models/sports');
-const User = require('../models/users');
+const mongoose = require('mongoose');
 const uniqid = require('uniqid');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
-// const cloudinary = require('cloudinary').v2;
-// const uniqid = require('uniqid');
-// const fs = require('fs');
-const mongoose = require('mongoose');
-
+const Group = require('../models/groups');
+const Sport = require('../models/sports');
+const User = require('../models/users');
 
 router.post('/create', (req, res) => {
 
@@ -122,8 +118,6 @@ router.post('/members', (req, res) => {
             res.json({ result: true, userdata })
         })
 })
-
-
 
 //upload group picture
 
