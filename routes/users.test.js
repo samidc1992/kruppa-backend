@@ -9,7 +9,6 @@ const { createApp } = require('../cleanArchApp');
 jest.mock('../services/User');
 const UserService = require('../services/User');
 const { disconnection } = require('../models/connection');
-const User = require('../models/users');
 
 describe('/user', () => {
     let app;
@@ -19,7 +18,7 @@ describe('/user', () => {
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
     });
 
     afterAll(async () => {
@@ -178,7 +177,7 @@ describe('/user', () => {
             it('should return result as false', async() => {
                 const userInput = {
                     gender: 'Male',
-                    photo: 'url-string-placeholder',
+                    photo: 'url-placeholder',
                     birthDate: '1992/10/11',
                     description: 'I swim in the Seine',
                     favoriteSports: [{
@@ -189,9 +188,34 @@ describe('/user', () => {
 
                 const userProfileCompletionControllerResponse =  { result: false, error: 'Missing or empty fields.' };
 
-                UserService.completeProfile.mockResolvedValueOnce();
+                //UserService.completeProfile.mockResolvedValueOnce();
 
                 const {body, statusCode} = await request(app).put('/users/signup').send(userInput);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userProfileCompletionControllerResponse);
+                expect(UserService.completeProfile).toHaveBeenCalledTimes(0);
+            })
+        });
+        describe('given that user token is not null but at least one mandatory profile field is null', () => {
+            it('should return result as false', async() => {
+                const input = {
+                    gender: 'Male',
+                    photo: 'url-placeholder',
+                    birthDate: '1992/10/11',
+                    description: null,
+                    favoriteSports: [{
+                        sport: 'Yoga',
+                        level: 'advanced'
+                    }],
+                    token: uid2(32),
+                };
+
+                const userProfileCompletionControllerResponse = { result: false, error: 'Missing or empty fields.' };
+
+                // UserService.completeProfile.mockResolvedValueOnce();
+
+                const { body, statusCode } = await request(app).put('/users/signup').send(input);
 
                 expect(statusCode).toBe(200);
                 expect(body).toEqual(userProfileCompletionControllerResponse);
@@ -202,7 +226,7 @@ describe('/user', () => {
             it('should return result as true', async() => {
                 const input = {
                     gender: 'Male',
-                    photo: 'url-string-placeholder',
+                    photo: 'url-placeholder',
                     birthDate: '1992/10/11',
                     description: 'I swim in the Seine',
                     favoriteSports: [{
@@ -213,9 +237,11 @@ describe('/user', () => {
                 };
 
                 const UserServiceMockResponse = {
-                    acknowledged: true, 
-                    matchedCount: 1, 
-                    modifiedCount: 1
+                    acknowledged: true,
+                    modifiedCount: 1,
+                    upsertedId: null,
+                    upsertedCount: 0,
+                    matchedCount: 1
                 };
                 
                 const userProfileCompletionControllerResponse = { result: true, message: 'Sucessfully updated user.' }
@@ -224,17 +250,36 @@ describe('/user', () => {
 
                 const {body, statusCode} = await request(app).put('/users/signup').send(input);
 
-                // expect(statusCode).toBe(200);
-                // expect(body).toEqual(userProfileCompletionControllerResponse);
-                // expect(UserService.completeProfile).toHaveBeenCalledTimes(1);
-                
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userProfileCompletionControllerResponse);
+                expect(UserService.completeProfile).toHaveBeenCalledTimes(1);
             })
         });
-        describe('given that user token is not null but at least one mandatory profile field is null', () => {
-            it('should return result as false', async() => {
+        describe('given that token and madatory fields are not null but the user service enconters an error and returns undefined', () => {
+            it('should return false', async() => {
+                const input = {
+                    gender: 'Male',
+                    photo: 'url-placeholder',
+                    birthDate: '1992/10/11',
+                    description: 'I swim in the Seine',
+                    favoriteSports: [{
+                        sport: 'Yoga',
+                        level: 'advanced'
+                    }],
+                    token: uid2(32),
+                };
 
+                const userProfileCompletionControllerResponse = {result: false, error: 'User token not found.'};
+
+                UserService.completeProfile.mockResolvedValueOnce();
+
+                const { body, statusCode } = await request(app).put('/users/signup').send(input);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userProfileCompletionControllerResponse);
+                expect(UserService.completeProfile).toHaveBeenCalledTimes(1);
             })
-        });
+        })
     })
 
     // a user can sign in with valid email and password

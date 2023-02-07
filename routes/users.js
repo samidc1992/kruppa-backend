@@ -42,13 +42,13 @@ router.put('/signup', async (req, res) => {
   };
 
   const updatedUser = await UserService.completeProfile(token, gender, photo, birthDate, description, favoriteSports);
-  console.log(updatedUser)
-  if(updatedUser.modifiedCount > 0) {
+
+  if(updatedUser && updatedUser.modifiedCount > 0) {
     res.json({ result: true, message: 'Sucessfully updated user.' });
     return
   }
-
-  res.json({result: false, error: 'User token not found or no changes done by the user.'})
+  
+  res.json({result: false, error: 'User token not found.'})
 
 });
 
