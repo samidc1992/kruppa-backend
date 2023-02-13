@@ -25,10 +25,8 @@ describe('/user', () => {
         await disconnection();
     });
 
-    describe('user registration', () => {
-
+    describe('user signup', () => {
         describe('given that the username, email and password are valid', () => {
-
             it('should return result as true and user token', async() => {
                 const userInput = {
                     username: 'aymeric',
@@ -48,7 +46,6 @@ describe('/user', () => {
                     token: uid2(32),
                 };
 
-                //mocks return value
                 //using mockResolvedValueOnce as it is async otherwise we could use mockReturnValueOnce
                 UserService.signup.mockResolvedValueOnce(UserServiceMockResponse);
                 
@@ -67,7 +64,6 @@ describe('/user', () => {
             const userSignupControllerResponse = { result: false, error: 'Missing or empty fields.'};
 
             describe('given that username is null', () => {
-
                 it('should return result as false', async() => {
                     const userInput = {
                         email: 'aymeric.secret@kruppa.com',
@@ -84,7 +80,6 @@ describe('/user', () => {
                 })
             });
             describe('given that email is null', () => {
-
                 it('should return result as false', async() => {
                     const userInput = {
                         username: 'aymeric',
@@ -101,7 +96,6 @@ describe('/user', () => {
                 })
             });
             describe('given that password is null', () => {
-
                 it('should return result as false', async() => {
                     const userInput = {
                         username: 'aymeric',
@@ -118,7 +112,6 @@ describe('/user', () => {
                 })
             });
             describe('given that username, email and password are null', () => {
-
                 it('should return result as false', async() => {
                     const userInput = {};
 
@@ -133,7 +126,6 @@ describe('/user', () => {
             });
         })
         describe('given that username or email already exist', () => {
-
             it('should return result as false', async() => {
                 const userInput = {
                     username: 'aymeric',
@@ -281,8 +273,133 @@ describe('/user', () => {
             })
         })
     })
+    describe('user signin', () => {
+        describe('given that email and password are valid', () => {
+            it('should return true', async() => {
+                const userInput = {
+                    email: 'aymeric.secret@kruppa.com',
+                    password: 'supermdp',
+                };
 
-    // a user can sign in with valid email and password
+                const userId = new mongoose.Types.ObjectId().toString();
+
+                const sportId = new mongoose.Types.ObjectId().toString();
+
+                const groupId = new mongoose.Types.ObjectId().toString();
+
+                const registrationId = new mongoose.Types.ObjectId().toString();
+
+                const token = uid2(32)
+
+                const UserServiceMockResponse = {
+                    _id: userId,
+                    username: 'aymeric',
+                    gender: 'male',
+                    email: 'aymeric.secret@kruppa.com',
+                    hash: 'hash',
+                    photo: 'photo-url',
+                    birthDate: '1992-06-17',
+                    description: 'I love running.',
+                    favoriteSports: [
+                      {
+                        sport: 'Running',
+                        level: 'intermediate',
+                        _id: sportId
+                      }
+                    ],
+                    registrations: [
+                      {
+                        group: groupId,
+                        status: 'Approved',
+                        _id: registrationId
+                      }
+                    ],
+                    token
+                }
+
+                const userSigninControllerResponse = {
+                    result: true,
+                    user: {
+                        token,
+                        username: 'aymeric'
+                    }
+                };
+
+                UserService.signin.mockResolvedValueOnce(UserServiceMockResponse);
+
+                const { body, statusCode } = await request(app).post('/users/signin').send(userInput);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userSigninControllerResponse);
+                expect(UserService.signin).toHaveBeenCalledTimes(1);
+
+            })
+        })
+        describe('given that email is not valid', () => {
+            it('should return false', async() => {
+                const userInput = {
+                    email: 'incorrect.email',
+                    password: 'supermdp',
+                };
+
+                const userSigninControllerResponse = { result: false, error: 'Missing or empty fields.' };
+
+                const { statusCode, body } = await request(app).post('/users/signin').send(userInput);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userSigninControllerResponse);
+                expect(UserService.signin).toHaveBeenCalledTimes(0);
+            })
+        })
+        describe('given that password is not valid', () => {
+            it('should return false', async() => {
+                const userInput = {
+                    email: 'aymeric.secret@kruppa.com',
+                    password: 'incorrectpassword',
+                };
+
+                const userSigninControllerResponse = { result: false, error: 'Invalid email or password.' };
+
+                UserService.signin.mockResolvedValueOnce();
+
+                const { statusCode, body } = await request(app).post('/users/signin').send(userInput);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userSigninControllerResponse);
+                expect(UserService.signin).toHaveBeenCalledTimes(1);
+            })
+        })
+        describe('given that email is null', () => {
+            it('should return false', async() => {
+                const userInput = {
+                    password: 'supermdp'
+                };
+
+                const userSigninControllerResponse = { result: false, error: 'Missing or empty fields.' };
+
+                const { statusCode, body } = await request(app).post('/users/signin').send(userInput);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userSigninControllerResponse);
+                expect(UserService.signin).toHaveBeenCalledTimes(0);
+            })
+        })
+        describe('given that password is null', () => {
+            it('should return false', async() => {
+                const userInput = {
+                    email: 'aymeric.secret@kruppa.com'
+                };
+
+                const userSigninControllerResponse = { result: false, error: 'Missing or empty fields.' };
+
+                const { statusCode, body } = await request(app).post('/users/signin').send(userInput);
+
+                expect(statusCode).toBe(200);
+                expect(body).toEqual(userSigninControllerResponse);
+                expect(UserService.signin).toHaveBeenCalledTimes(0);
+            })
+        })
+    })
     // a user can join and leave a group
     // users can create a group
     //
