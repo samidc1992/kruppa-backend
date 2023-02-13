@@ -55,8 +55,10 @@ router.put('/signup', async (req, res) => {
 router.post('/signin', async (req, res) => {
 
   const { email, password } = req.body;
+  const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  if (!checkBody(req.body, ['email', 'password'])) {
+
+  if (!checkBody(req.body, ['email', 'password']) || !EMAIL_REGEX.test(req.body.email)) {
     res.json({ result: false, error: 'Missing or empty fields.' });
     return;
   };
