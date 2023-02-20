@@ -49,7 +49,7 @@ const joinGroup = async (token, group_id, status) => {
     const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
 
     if (!userData) {
-        const joinGroupUpdateInformation = await UserEntity.addUserGroupSubscription(token, group_id, status);
+        const joinGroupUpdateInformation = await UserEntity.addUserToGroup(token, group_id, status);
         return joinGroupUpdateInformation;
     };
 };
@@ -59,7 +59,7 @@ const leaveGroup = async (token, group_id) => {
     const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
 
     if (userData) {
-        const joinGroupUpdateInformation = await UserEntity.removeUserGroupSubscription(token, group_id);
+        const joinGroupUpdateInformation = await UserEntity.removeUserFromGroup(token, group_id);
         return joinGroupUpdateInformation;
     };
 };
