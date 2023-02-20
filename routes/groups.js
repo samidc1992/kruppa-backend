@@ -6,121 +6,87 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
 const Group = require('../models/groups');
-const Sport = require('../models/sports');
-const User = require('../models/users');
+const GroupService = require('../services/Group');
 
-router.post('/create', (req, res) => {
+router.post('/create', async(req, res) => {
 
-    let { token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude } = req.body;
+    let { token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status } = req.body;
 
-
-    if (!token && !photo && !name && !sport && !maxMembers && !genders && !levels && !ageMin && !ageMax && !description && !label && !latitude && !longitude) {
-        res.json({ result: false, message: 'Missing or empty fields.' });
+    if (!token || !photo || !name || !sport || !maxMembers || !genders || !levels || !ageMin || !ageMax || !description || !label || !latitude || !longitude) {
+        res.json({ result: false, error: 'Missing or empty fields.' });
         return
     };
 
-    Sport.findOne({ label: sport }).then(sport => {
-        User.findOne({ token: token })
-            .then(user => {
-                const newGroup = new Group({
-                    admin: user._id,
-                    photo,
-                    name,
-                    sport: sport._id,
-                    maxMembers,
-                    genders,
-                    levels,
-                    ageMin,
-                    ageMax,
-                    description,
-                    workout_location: {
-                        label,
-                        location: {
-                            type: 'Point',
-                            coordinates: [longitude, latitude]
-                        }
-                    }
-                });
-                newGroup.save().then(newEntry => {
-                    User.updateOne(
-                        { token: token },
-                        { $push: { registrations: { group: newEntry._id, status: "Approved" } } }
-                    ).then(() => {
-                        res.json({ result: true, message: 'New group created successfully.', data: newEntry });
-                    })
-                });
-            });
-    })
+    const newGroupData = await GroupService.createGroup(token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status);
+
+    if(newGroupData) {
+        res.json({ result: true, message: 'New group created successfully.', data: newGroupData });
+    } else {
+        res.json({ result: false, error: 'New group could not be created successfully.' });
+    }
+    
 });
 
-router.get('/search', (req, res) => {
+router.get('/search', async(req, res) => {
 
     let { sport, latitude, longitude } = req.query;
 
     if ((!sport && !latitude && !longitude) || ((latitude || longitude) && (!latitude || !longitude))) {
-        res.json({ result: false, message: 'Missing or empty fields.' });
+        res.json({ result: false, error: 'Missing or empty fields.' });
         return;
     }
 
-    Sport.findOne({ label: sport })
-        .then(sportData => {
-            Group.find({
-                ...(sport && { sport: sportData._id }),
-                ...((latitude && longitude) && {
-                    "workout_location.location": {
-                        $geoWithin: {
-                            $centerSphere: [[Number(longitude), Number(latitude)],
-                            10 / 6378.1] //create a file with all consts
-                        }
-                    }
-                })
-            })
-                .populate('sport')
-                .then(groups => {
-                    if (groups.length > 0) {
-                        res.json({ result: true, groups }) //add map function to transform the object in order to change format and contain latitude and longitude (avoids errors from long/lat by default from mongo)
-                    } else {
-                        res.json({ result: false, message: 'No groups found.', groups })
-                    }
-                });
-        });
+    const groups = await GroupService.searchGroup(sport, latitude, longitude);
+
+    if(groups) {
+        res.json({ result: true, groups }) 
+    } else {
+        res.json({ result: false, error: 'No groups found for sport and/or location.'})
+    }
+
 });
 
-// Retrieves group information
-router.post('/main', (req, res) => {
+// retrieves group information
+router.post('/main', async(req, res) => {
     let { group_id } = req.body;
     const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
 
     if (!isGroupIdValid) {
-        res.json({ result: false, message: 'Invalid group id.' });
+        res.json({ result: false, error: 'Missing or invalid group id.' });
         return;
     };
 
-    Group.findById(group_id)
-        .populate('sport', 'label -_id')
-        .populate('admin', 'username -_id')
-        .then(groupData => {
-            if (groupData) {
-                res.json({ result: true, groupData })
-            } else {
-                res.json({ result: false, message: 'No group found for group id received.' })
-            }
-        });
+    const groupData = await GroupService.getGroupInformation(group_id);
+
+    if (groupData) {
+        res.json({ result: true, groupData })
+    } else {
+        res.json({ result: false, error: 'No group found for group id.' })
+    };
+
 });
 
-
-//Get all memebers of a given group 
-router.post('/members', (req, res) => {
+// get all members for a given group 
+router.post('/members', async(req, res) => {
     let { group_id } = req.body;
+    const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
 
-    User.find({ 'registrations.group': group_id })
-        .then(userdata => {
-            res.json({ result: true, userdata })
-        })
+    if (!isGroupIdValid) {
+        res.json({ result: false, error: 'Missing or invalid group id.' });
+        return;
+    };
+
+    const userData = await GroupService.getGroupMembers(group_id);
+
+    if(userData) {
+        res.json({ result: true, userData })
+    } else {
+        res.json({ result: false, error: 'No users found for group id.' })
+    };
+
 })
 
-//upload group picture
-
+// upload group picture
 router.post('/upload', async (req, res) => {
 
     const photoPath = `./tmp/${uniqid()}.jpg`;
@@ -147,7 +113,6 @@ router.put('/picture', (req, res) => {
         });
 
     });
-})
-
+});
 
 module.exports = router;

@@ -400,7 +400,6 @@ describe('/user', () => {
             })
         })
     })
-    // a user can join and leave a group
-    // users can create a group
-    //
+    // an user can join and leave a group
+    // an user can create a group
 });
