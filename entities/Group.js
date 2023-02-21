@@ -27,7 +27,7 @@ const findGroupById = async(group_id) => {
     return group;
 }
 
-const updateGroupById = async(group_id) => {
+const updateGroupPhotoById = async(group_id, url) => {
 
     const updateInformation = await Group.updateOne(
         { _id: group_id },
@@ -41,5 +41,5 @@ const updateGroupById = async(group_id) => {
 module.exports = {
     findGroupBySportAndOrLocation,
     findGroupById,
-    updateGroupById,
+    updateGroupPhotoById,
 };
