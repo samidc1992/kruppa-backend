@@ -4,9 +4,9 @@ const UserEntity = require('../entities/User');
 
 const Group = require('../models/groups');
 
-const createGroup = async(token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status) => {
+const createGroup = async(token, photo, name, sportName, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status) => {
 
-    const sportData = await SportEntity.findSportBySportName(sport);
+    const sportData = await SportEntity.findSportBySportName(sportName);
     const userData = await UserEntity.findUserByToken(token);
 
     if(!sportData || !userData) {

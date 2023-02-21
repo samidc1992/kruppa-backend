@@ -14,7 +14,7 @@ router.post('/create', async(req, res) => {
 
     if (!token || !photo || !name || !sport || !maxMembers || !genders || !levels || !ageMin || !ageMax || !description || !label || !latitude || !longitude) {
         res.json({ result: false, error: 'Missing or empty fields.' });
-        return
+        return;
     };
 
     const newGroupData = await GroupService.createGroup(token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status);
