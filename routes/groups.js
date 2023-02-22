@@ -48,15 +48,15 @@ router.get('/search', async(req, res) => {
 
 // retrieves group information
 router.post('/main', async(req, res) => {
-    let { group_id } = req.body;
-    const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
+    let { groupId } = req.body;
+    const isGroupIdValid = mongoose.Types.ObjectId.isValid(groupId);
 
     if (!isGroupIdValid) {
         res.json({ result: false, error: 'Missing or invalid group id.' });
         return;
     };
 
-    const groupData = await GroupService.getGroupInformation(group_id);
+    const groupData = await GroupService.getGroupInformation(groupId);
 
     if (groupData) {
         res.json({ result: true, groupData })
@@ -68,15 +68,15 @@ router.post('/main', async(req, res) => {
 
 // get all members for a given group 
 router.post('/members', async(req, res) => {
-    let { group_id } = req.body;
-    const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
+    let { groupId } = req.body;
+    const isGroupIdValid = mongoose.Types.ObjectId.isValid(groupId);
 
     if (!isGroupIdValid) {
         res.json({ result: false, error: 'Missing or invalid group id.' });
         return;
     };
 
-    const userData = await GroupService.getGroupMembers(group_id);
+    const userData = await GroupService.getGroupMembers(groupId);
 
     if(userData) {
         res.json({ result: true, userData })
@@ -103,12 +103,12 @@ router.post('/upload', async (req, res) => {
 });
 
 router.put('/picture', (req, res) => {
-    const { group_id, url } = req.body
+    const { groupId, url } = req.body
     Group.updateOne(
-        { _id: group_id },
+        { _id: groupId },
         { photo: url }
     ).then(() => {
-        Group.findOne({ _id: group_id }).then(data => {
+        Group.findOne({ _id: groupId }).then(data => {
             res.json({ result: true, photo: data.photo });
         });
 
