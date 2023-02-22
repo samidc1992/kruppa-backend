@@ -13,7 +13,7 @@ const createGroup = async(token, photo, name, sportName, maxMembers, genders, le
         return;
     };
 
-    const newGroup = await new Group({
+    const newGroup = new Group({
         admin: userData._id,
         photo,
         name,
@@ -33,7 +33,7 @@ const createGroup = async(token, photo, name, sportName, maxMembers, genders, le
         }
     });
 
-    const newGroupData = await newGroup.save();
+    const newGroupData = newGroup.save();
 
     await UserEntity.addUserToGroup(token, newGroupData._id, status);
 
