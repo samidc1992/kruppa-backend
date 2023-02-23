@@ -7,8 +7,7 @@ const getAllSports = async() => {
 };
 
 const findSportByName = async(sportName) => {
-    const sportData = await SportEntity.findSportBySportName(sportName);
-    return sportData;
+    return SportEntity.findSportBySportName(sportName);
 };
 
 const addNewSportToDataBase = async(sportName) => {
