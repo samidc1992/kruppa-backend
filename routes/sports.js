@@ -2,38 +2,36 @@ var express = require('express');
 var router = express.Router();
 const { checkBody } = require('../utils/checkBody');
 
-const Sport = require('../models/sports');
+const SportService = require ('../services/Sport');
 
-router.post('/', (req, res) => {
-    // Check if all fiels are filled out
+router.post('/', async (req, res) => {
+
     if (!checkBody(req.body, ['label'])) {
-        res.json({ result: false, error: 'Missing or empty fields' });
+        res.json({ result: false, error: 'Missing or empty fields.' });
         return;
-    }
+    };
 
-    const sportToSave = req.body.label.toLowerCase()
+    const { label } = req.body;
+    const sportName = label[0].toUpperCase() + label.slice(1).toLowerCase();
+    const sportData = await SportService.findSportByName(sportName);
 
-    Sport.findOne({ label: sportToSave }).then(data => {
-        if (data === null) {
-            const newSport = new Sport({
-                label: sportToSave
-            });
-            newSport.save().then(newDoc => {
-                res.json({ result: true, token: newDoc.token });
-            });
-        }
-        else {
-            // User already exists in database
-            res.json({ result: false, error: 'Sport already exists' });
-        }
-    })
+    if(sportData === null) {
+        const savedSport = await SportService.addNewSportToDataBase(sportName);
+        res.json({ result: true, sport: savedSport });
+    } else {
+        res.json({ result: false, error: 'Sport already exists in database.' });
+    };
 })
 
-router.get('/', (req, res) => {
-    Sport.find().then(data => {
-        sportsData = data.map(e => e.label)
-        res.json({ result: true, sports: sportsData });
-    });
+router.get('/', async(req, res) => {
+
+    const sportsNames = await SportService.getAllSports();
+
+    if(sportsNames) {
+        res.json({ result: true, sports: sportsNames });
+    } else {
+        res.json({ result: false, error: 'Sports not found.' });
+    };
 })
 
 module.exports = router;
