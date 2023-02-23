@@ -3,8 +3,7 @@ const Sport = require('../models/sports');
 
 const getAllSports = async() => {
     const sportsData = await SportEntity.findAllSports();
-    sportsNames = sportsData.map(sport => sport.label);
-    return sportsNames;
+    return sportsData.map(sport => sport.label);
 };
 
 const findSportByName = async(sportName) => {
