@@ -1,12 +1,9 @@
 var express = require('express');
 var router = express.Router();
 const mongoose = require('mongoose');
-const uniqid = require('uniqid');
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
 
-const Group = require('../models/groups');
 const GroupService = require('../services/Group');
+const { uploadPictureToCloudinary } = require('../utils/uploadPictureToCloud')
 
 router.post('/create', async(req, res) => {
 
@@ -76,10 +73,10 @@ router.post('/members', async(req, res) => {
         return;
     };
 
-    const userData = await GroupService.getGroupMembers(groupId);
+    const usersData = await GroupService.getGroupMembers(groupId);
 
-    if(userData) {
-        res.json({ result: true, userData })
+    if(usersData) {
+        res.json({ result: true, usersData })
     } else {
         res.json({ result: false, error: 'No users found for group id.' })
     };
@@ -87,32 +84,22 @@ router.post('/members', async(req, res) => {
 })
 
 // upload group picture
-router.post('/upload', async (req, res) => {
+router.post('/upload', async(req, res) => {
 
-    const photoPath = `./tmp/${uniqid()}.jpg`;
-    const resultMove = await req.files.groupPicture.mv(photoPath);
+    let { files } = req;
 
-    if (!resultMove) {
-        const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+    if(!files) {
+        res.json({ result: false, error: 'No files received.' });
+    };
+
+    const resultCloudinary = await uploadPictureToCloudinary(files.groupPicture);
+
+    if (resultCloudinary) {
         res.json({ result: true, url: resultCloudinary.secure_url });
     } else {
         res.json({ result: false, error: resultMove });
-    }
-    fs.unlinkSync(photoPath);
+    };
 
-});
-
-router.put('/picture', (req, res) => {
-    const { groupId, url } = req.body
-    Group.updateOne(
-        { _id: groupId },
-        { photo: url }
-    ).then(() => {
-        Group.findOne({ _id: groupId }).then(data => {
-            res.json({ result: true, photo: data.photo });
-        });
-
-    });
 });
 
 module.exports = router;

@@ -18,23 +18,23 @@ const findGroupBySportAndOrLocation = async(sportName, sportId, latitude, longit
     return groups;
 };
 
-const findGroupById = async(group_id) => {
+const findGroupById = async(groupId) => {
 
-    const group = await Group.findById(group_id)
+    const group = await Group.findById(groupId)
     .populate('sport', 'label -_id')
     .populate('admin', 'username -_id');
 
     return group;
 }
 
-const updateGroupPhotoById = async(group_id, url) => {
+const updateGroupPhotoById = async(groupId, url) => {
 
     const updateInformation = await Group.updateOne(
-        { _id: group_id },
+        { _id: groupId },
         { photo: url }
     );
 
-    return updateInformation
+    return updateInformation;
 }
 
 

@@ -44,22 +44,22 @@ const completeProfile = async (token, gender, photo, birthDate, description, fav
     return updatedUser;
 };
 
-const joinGroup = async (token, group_id, status) => {
+const joinGroup = async (token, groupId, status) => {
 
-    const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+    const userData = await UserEntity.findUserByTokenAndGroupId(token, groupId);
 
     if (!userData) {
-        const joinGroupUpdateInformation = await UserEntity.addUserToGroup(token, group_id, status);
+        const joinGroupUpdateInformation = await UserEntity.addUserToGroup(token, groupId, status);
         return joinGroupUpdateInformation;
     };
 };
 
-const leaveGroup = async (token, group_id) => {
+const leaveGroup = async (token, groupId) => {
 
-    const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+    const userData = await UserEntity.findUserByTokenAndGroupId(token, groupId);
 
     if (userData) {
-        const joinGroupUpdateInformation = await UserEntity.removeUserFromGroup(token, group_id);
+        const joinGroupUpdateInformation = await UserEntity.removeUserFromGroup(token, groupId);
         return joinGroupUpdateInformation;
     };
 };
@@ -69,10 +69,15 @@ const getUserGroupsInformation = async (token) => {
     return user;
 };
 
-const getUserGroupStatus = async (token, group_id) => {
-    const user = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+const getUserGroupStatus = async (token, groupId) => {
+    const user = await UserEntity.findUserByTokenAndGroupId(token, groupId);
     return user;
-}
+};
+
+const addProfilePicture = async(token, photo) => {
+    const updateInformation = await UserEntity.updateUserProfilePictureByToken(token, photo);
+    return updateInformation;
+};
 
 module.exports = {
     signup,
@@ -81,5 +86,6 @@ module.exports = {
     joinGroup,
     leaveGroup,
     getUserGroupsInformation,
-    getUserGroupStatus
+    getUserGroupStatus,
+    addProfilePicture
 };

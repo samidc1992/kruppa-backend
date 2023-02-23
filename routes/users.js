@@ -1,14 +1,11 @@
 var express = require('express');
 var router = express.Router();
-
 const mongoose = require('mongoose');
-const uniqid = require('uniqid');
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
 
 const User = require('../models/users');
 const UserService = require('../services/User');
-const { checkBody } = require('../modules/checkBody');
+const { checkBody } = require('../utils/checkBody');
+const { uploadPictureToCloudinary } = require('../utils/uploadPictureToCloud');
 
 router.post('/signup', async (req, res) => {
 
@@ -76,15 +73,15 @@ router.post('/signin', async (req, res) => {
 
 router.put('/join-group', async (req, res) => {
 
-  const { token, group_id, status } = req.body;
-  const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
+  const { token, groupId, status } = req.body;
+  const isGroupIdValid = mongoose.Types.ObjectId.isValid(groupId);
 
-  if (!token || !group_id || !isGroupIdValid) {
+  if (!token || !groupId || !isGroupIdValid) {
     res.json({ result: false, message: 'Invalid token or group id.' });
     return;
   };
 
-  const updateInformation = await UserService.joinGroup(token, group_id, status);
+  const updateInformation = await UserService.joinGroup(token, groupId, status);
 
   if (updateInformation) {
     res.json({ result: true, message: 'User joined sucessfully.' });
@@ -96,15 +93,15 @@ router.put('/join-group', async (req, res) => {
 
 router.put('/leave-group', async (req, res) => {
 
-  const { token, group_id } = req.body;
-  const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
+  const { token, groupId } = req.body;
+  const isGroupIdValid = mongoose.Types.ObjectId.isValid(groupId);
 
-  if (!token || !group_id || !isGroupIdValid) {
+  if (!token || !groupId || !isGroupIdValid) {
     res.json({ result: false, message: 'Invalid token or group id received.' });
     return;
   };
 
-  const updateInformation = await UserService.leaveGroup(token, group_id);
+  const updateInformation = await UserService.leaveGroup(token, groupId);
   
   if (updateInformation) {
     res.json({ result: true, message: 'User left sucessfully.' });
@@ -134,15 +131,15 @@ router.post('/groups', async (req, res) => {
 });
 
 router.post('/join-status', async (req, res) => {
-  const { token, group_id } = req.body;
-  const isGroupIdValid = mongoose.Types.ObjectId.isValid(group_id);
+  const { token, groupId } = req.body;
+  const isGroupIdValid = mongoose.Types.ObjectId.isValid(groupId);
 
-  if (!token || !group_id || !isGroupIdValid) {
+  if (!token || !groupId || !isGroupIdValid) {
     res.json({ result: false, message: 'Invalid token or group id received.' });
     return;
   };
 
-  const user = await UserService.getUserGroupStatus(token, group_id);
+  const user = await UserService.getUserGroupStatus(token, groupId);
 
   if (user) {
     res.json({ result: false, message: 'User already joined this group.' });
@@ -152,33 +149,32 @@ router.post('/join-status', async (req, res) => {
   res.json({ result: true, message: 'User not in this group.' })
 });
 
-router.post('/upload', async (req, res) => {
+router.post('/upload', async(req, res) => {
 
-  const photoPath = `./tmp/${uniqid()}.jpg`;
-  const resultMove = await req.files.profilePicture.mv(photoPath);
+  let { files } = req;
 
-  if (!resultMove) {
-    const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+  if(!files) {
+    res.json({ result: false, error: 'No files received.'})
+  };
+
+  const resultCloudinary = await uploadPictureToCloudinary(files.profilePicture);
+
+  if(resultCloudinary) {
     res.json({ result: true, url: resultCloudinary.secure_url });
   } else {
     res.json({ result: false, error: resultMove });
-  }
-  fs.unlinkSync(photoPath);
-
+  };
 });
 
-router.put('/picture', (req, res) => {
-  const { token, url } = req.body
-  User.updateOne(
-    { token: token },
-    { photo: url }
-  ).then(() => {
-    User.findOne({ token: token }).then(data => {
-      res.json({ result: true, photo: data.photo });
-    });
+router.put('/picture', async (req, res) => {
+  const { token, url } = req.body;
+  const updateInformation = await UserService.addProfilePicture(token, url);
 
-  });
+  if (updateInformation.modifiedCount > 0) {
+    res.json({ result: true, photo: url });
+  } else {
+    res.json({ result: false, error: 'Profile picture could not be updated sucessfully.'});
+  };
 });
-
 
 module.exports = router;

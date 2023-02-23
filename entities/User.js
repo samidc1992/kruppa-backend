@@ -28,8 +28,8 @@ const findUserByToken = async (token) => {
   return user;
 };
 
-const findUsersByGroupId = async(group_id) => {
-  const usersData = await User.find({ 'registrations.group': group_id });
+const findUsersByGroupId = async(groupId) => {
+  const usersData = await User.find({ 'registrations.group': groupId });
   return usersData;
 };
 
@@ -47,18 +47,26 @@ const updateUserByToken = async (token, gender, photo, birthDate, description, f
   return updatedUser;
 };
 
-const findUserByTokenAndGroupId = async (token, group_id) => {
-  const user = await User.findOne({ token, 'registrations.group': group_id });
+const updateUserProfilePictureByToken = async(token, photo) => {
+  const updatedUserInformation = await User.updateOne( 
+    {token},
+    {photo}
+  );
+  return updatedUserInformation;
+};
+
+const findUserByTokenAndGroupId = async (token, groupId) => {
+  const user = await User.findOne({ token, 'registrations.group': groupId });
   return user;
 };
 
-const addUserToGroup = async (token, group_id, status) => {
+const addUserToGroup = async (token, groupId, status) => {
   const user = await User.updateOne(
       { token },
       {
         $push: {
           registrations: {
-            group: group_id,
+            group: groupId,
             status,
           }
         }
@@ -67,13 +75,13 @@ const addUserToGroup = async (token, group_id, status) => {
   return user;
 };
 
-const removeUserFromGroup = async (token, group_id) => {
+const removeUserFromGroup = async (token, groupId) => {
   const user = await User.updateOne(
       { token },
       {
         $pull: {
           registrations: {
-            group: group_id,
+            group: groupId,
             status: "Approved",
           }
         }
@@ -90,6 +98,7 @@ module.exports = {
     findUserByToken,
     findUsersByGroupId,
     updateUserByToken,
+    updateUserProfilePictureByToken,
     findUserByTokenAndGroupId,
     addUserToGroup,
     removeUserFromGroup,
