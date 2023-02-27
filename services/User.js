@@ -40,39 +40,38 @@ const signin = async (email, password) => {
 
 const completeProfile = async (token, gender, photo, birthDate, description, favoriteSports) => {
 
-    const updatedUser = await UserEntity.updateUserByToken(token, gender, photo, birthDate, description, favoriteSports);
-    return updatedUser;
+    return UserEntity.updateUserByToken(token, gender, photo, birthDate, description, favoriteSports);
 };
 
-const joinGroup = async (token, group_id, status) => {
+const joinGroup = async (token, groupId, status) => {
 
-    const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+    const userData = await UserEntity.findUserByTokenAndGroupId(token, groupId);
 
     if (!userData) {
-        const joinGroupUpdateInformation = await UserEntity.addUserToGroup(token, group_id, status);
-        return joinGroupUpdateInformation;
+        return UserEntity.addUserToGroup(token, groupId, status);
     };
 };
 
-const leaveGroup = async (token, group_id) => {
+const leaveGroup = async (token, groupId) => {
 
-    const userData = await UserEntity.findUserByTokenAndGroupId(token, group_id);
+    const userData = await UserEntity.findUserByTokenAndGroupId(token, groupId);
 
     if (userData) {
-        const joinGroupUpdateInformation = await UserEntity.removeUserFromGroup(token, group_id);
-        return joinGroupUpdateInformation;
+        return UserEntity.removeUserFromGroup(token, groupId);
     };
 };
 
 const getUserGroupsInformation = async (token) => {
-    const user = await UserEntity.findUserByToken(token);
-    return user;
+    return UserEntity.findUserByToken(token);
 };
 
-const getUserGroupStatus = async (token, group_id) => {
-    const user = await UserEntity.findUserByTokenAndGroupId(token, group_id);
-    return user;
-}
+const getUserGroupStatus = async (token, groupId) => {
+    return UserEntity.findUserByTokenAndGroupId(token, groupId);
+};
+
+const addProfilePicture = async(token, photo) => {
+    return UserEntity.updateUserProfilePictureByToken(token, photo);
+};
 
 module.exports = {
     signup,
@@ -81,5 +80,6 @@ module.exports = {
     joinGroup,
     leaveGroup,
     getUserGroupsInformation,
-    getUserGroupStatus
+    getUserGroupStatus,
+    addProfilePicture
 };

@@ -1,22 +1,19 @@
 const User = require('../models/users');
 
 const findUserByUsernameAndEmail = async (username, email) => {
-  const user = await User.findOne({ username, email });
-  return user;
+  return User.findOne({ username, email });
 };
 
 const findUserByUsername = async (username) => {
-  const user = await User.findOne({ username });
-  return user;
+  return User.findOne({ username });
 };
 
 const findUserByEmail = async (email) => {
-  const user = await User.findOne({ email });
-  return user;
+  return await User.findOne({ email });
 };
 
 const findUserByToken = async (token) => {
-  const user = await User.findOne({ token })
+  return User.findOne({ token })
   .populate('registrations.group')
   .populate({ //get populate from sub sub document
     path: "registrations.group", // 1st level subdoc
@@ -25,16 +22,14 @@ const findUserByToken = async (token) => {
       select: "label"
     }
   });
-  return user;
 };
 
-const findUsersByGroupId = async(group_id) => {
-  const usersData = await User.find({ 'registrations.group': group_id });
-  return usersData;
+const findUsersByGroupId = async(groupId) => {
+  return User.find({ 'registrations.group': groupId });
 };
 
 const updateUserByToken = async (token, gender, photo, birthDate, description, favoriteSports) => {
-  const updatedUser = await User.updateOne(
+  return User.updateOne(
       { token },
       {
           gender,
@@ -44,42 +39,45 @@ const updateUserByToken = async (token, gender, photo, birthDate, description, f
           favoriteSports,
       }
   );
-  return updatedUser;
 };
 
-const findUserByTokenAndGroupId = async (token, group_id) => {
-  const user = await User.findOne({ token, 'registrations.group': group_id });
-  return user;
+const updateUserProfilePictureByToken = async(token, photo) => {
+  return User.updateOne( 
+    {token},
+    {photo}
+  );
 };
 
-const addUserToGroup = async (token, group_id, status) => {
-  const user = await User.updateOne(
+const findUserByTokenAndGroupId = async (token, groupId) => {
+  return User.findOne({ token, 'registrations.group': groupId });
+};
+
+const addUserToGroup = async (token, groupId, status) => {
+  return User.updateOne(
       { token },
       {
         $push: {
           registrations: {
-            group: group_id,
+            group: groupId,
             status,
           }
         }
       }
   );
-  return user;
 };
 
-const removeUserFromGroup = async (token, group_id) => {
-  const user = await User.updateOne(
+const removeUserFromGroup = async (token, groupId) => {
+  return User.updateOne(
       { token },
       {
         $pull: {
           registrations: {
-            group: group_id,
+            group: groupId,
             status: "Approved",
           }
         }
       }
   );
-  return user;
 };
 
 
@@ -90,6 +88,7 @@ module.exports = {
     findUserByToken,
     findUsersByGroupId,
     updateUserByToken,
+    updateUserProfilePictureByToken,
     findUserByTokenAndGroupId,
     addUserToGroup,
     removeUserFromGroup,

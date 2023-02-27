@@ -53,23 +53,25 @@ const searchGroup = async(sport, latitude, longitude) => {
     return groupsData;
 };
 
-const getGroupInformation = async(group_id) => {
+const getGroupInformation = async(groupId) => {
 
-    const groupData = await GroupEntity.findGroupById(group_id);
-
-    return groupData;
+    return GroupEntity.findGroupById(groupId);
 };
 
-const getGroupMembers = async(group_id) => {
+const getGroupMembers = async(groupId) => {
 
-    const membersData = await UserEntity.findUsersByGroupId(group_id);
-    
-    return membersData
-}
+    return UserEntity.findUsersByGroupId(groupId);
+};
+
+const updateGroupPictureURL = async(groupId, url) => {
+
+    return GroupEntity.updateGroupPhotoById(groupId, url);
+};
 
 module.exports = {
     createGroup,
     searchGroup,
     getGroupInformation,
-    getGroupMembers
+    getGroupMembers,
+    updateGroupPictureURL,
 }
