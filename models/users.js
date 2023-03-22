@@ -1,26 +1,26 @@
 const mongoose = require('mongoose');
 
 const favoriteSportSchema = mongoose.Schema({
-    sport: String, //{ type: mongoose.Schema.Types.ObjectId, ref: 'sports' },
-    level: String,
+  sport: String, // { type: mongoose.Schema.Types.ObjectId, ref: 'sports' },
+  level: String,
 });
 
 const registrationSchema = mongoose.Schema({
-    group: { type: mongoose.Schema.Types.ObjectId, ref: 'groups' },
-    status: { type: String, default: 'Approved'},
+  group: { type: mongoose.Schema.Types.ObjectId, ref: 'groups' },
+  status: { type: String, default: 'Approved' },
 });
 
 const usersSchema = mongoose.Schema({
-    username: String,
-    gender: String,
-    email: String,
-    hash: String,
-    photo: String,
-    birthDate: Date,
-    description: String,
-    favoriteSports: [favoriteSportSchema],
-    registrations: [registrationSchema],
-    token: String
+  username: String,
+  gender: String,
+  email: String,
+  hash: String,
+  photo: String,
+  birthDate: Date,
+  description: String,
+  favoriteSports: [favoriteSportSchema],
+  registrations: [registrationSchema],
+  token: String,
 });
 
 const User = mongoose.model('users', usersSchema);

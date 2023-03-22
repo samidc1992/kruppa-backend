@@ -1,14 +1,10 @@
 const Sport = require('../models/sports');
 
-const findSportBySportName = async(sport) => {
-    return Sport.findOne({ label: sport });
-};
+const findSportBySportName = async (sport) => Sport.findOne({ label: sport });
 
-const findAllSports = async() => {
-    return Sport.find();
-};
+const findAllSports = async () => Sport.find();
 
 module.exports = {
-    findSportBySportName,
-    findAllSports
+  findSportBySportName,
+  findAllSports,
 };
