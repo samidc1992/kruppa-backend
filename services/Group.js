@@ -2,8 +2,6 @@ const GroupEntity = require('../entities/Group');
 const SportEntity = require('../entities/Sport');
 const UserEntity = require('../entities/User');
 
-const Group = require('../models/groups');
-
 const createGroup = async (
   token,
   photo,
@@ -20,41 +18,40 @@ const createGroup = async (
   longitude,
   status,
 ) => {
-  const sportData = await SportEntity.findSportBySportName(sportName);
-  const userData = await UserEntity.findUserByToken(token);
+  try {
+    const userData = await UserEntity.findUserByToken(token);
+    const sportData = await SportEntity.findSportBySportName(sportName);
 
-  if (!sportData || !userData) {
-    return;
-  }
+    if (!sportData || !userData) {
+      return;
+    }
 
-  const newGroup = new Group({
-    // eslint-disable-next-line
-    admin: userData._id,
-    photo,
-    name,
-    // eslint-disable-next-line
-    sport: sportData._id,
-    maxMembers,
-    genders,
-    levels,
-    ageMin,
-    ageMax,
-    description,
-    workout_location: {
+    const newGroupData = await GroupEntity.createGroup(
+      // eslint-disable-next-line
+      userData._id,
+      photo,
+      name,
+      // eslint-disable-next-line
+      sportData._id,
+      maxMembers,
+      genders,
+      levels,
+      ageMin,
+      ageMax,
+      description,
       label,
-      location: {
-        type: 'Point',
-        coordinates: [longitude, latitude],
-      },
-    },
-  });
+      latitude,
+      longitude,
+    );
 
-  const newGroupData = await newGroup.save();
+    // eslint-disable-next-line
+    await UserEntity.addUserToGroup(token, newGroupData._id, status);
 
-  // eslint-disable-next-line
-  await UserEntity.addUserToGroup(token, newGroupData._id, status);
-
-  return newGroupData;
+    return newGroupData;
+  } catch (error) {
+    console.log('[services/Group.createGroup] Error', error);
+    throw error;
+  }
 };
 
 const searchGroup = async (sport, latitude, longitude) => {

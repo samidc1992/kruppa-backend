@@ -1,4 +1,25 @@
+const bcrypt = require('bcryptjs');
+const uid2 = require('uid2');
+
 const User = require('../models/users');
+
+const createUser = async (username, email, password) => {
+  const hash = bcrypt.hashSync(password, 10);
+  const newUser = new User({
+    username,
+    gender: null,
+    email,
+    hash,
+    photo: null,
+    birthDate: null,
+    description: null,
+    favoriteSports: [],
+    registrations: [],
+    token: uid2(32),
+  });
+
+  return newUser.save();
+};
 
 const findUserByUsernameAndEmail = async (username, email) => User.findOne({ username, email });
 
@@ -68,6 +89,7 @@ const removeUserFromGroup = async (token, groupId) => User.updateOne(
 );
 
 module.exports = {
+  createUser,
   findUserByUsernameAndEmail,
   findUserByUsername,
   findUserByEmail,
