@@ -1,6 +1,11 @@
 const Group = require('../models/groups');
 
-const findGroupBySportAndOrLocation = async (sportName, sportId, latitude, longitude) => Group.find({
+const findGroupBySportAndOrLocation = async (
+  sportName,
+  sportId,
+  latitude,
+  longitude,
+) => Group.find({
   ...(sportName && { sport: sportId }),
   ...((latitude && longitude) && {
     'workout_location.location': {

@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
+  // eslint-disable-next-line
   const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   if (!checkBody(req.body, ['username', 'email', 'password']) || !EMAIL_REGEX.test(req.body.email)) {
@@ -36,7 +37,14 @@ router.put('/signup', async (req, res) => {
     return;
   }
 
-  const updatedUser = await UserService.completeProfile(token, gender, photo, birthDate, description, favoriteSports);
+  const updatedUser = await UserService.completeProfile(
+    token,
+    gender,
+    photo,
+    birthDate,
+    description,
+    favoriteSports,
+  );
 
   if (updatedUser && updatedUser.modifiedCount > 0) {
     res.json({ result: true, message: 'Sucessfully updated user.' });
@@ -48,6 +56,7 @@ router.put('/signup', async (req, res) => {
 
 router.post('/signin', async (req, res) => {
   const { email, password } = req.body;
+  // eslint-disable-next-line
   const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   if (!checkBody(req.body, ['email', 'password']) || !EMAIL_REGEX.test(req.body.email)) {
@@ -152,7 +161,7 @@ router.post('/upload', async (req, res) => {
   if (resultCloudinary) {
     res.json({ result: true, url: resultCloudinary.secure_url });
   } else {
-    res.json({ result: false, error: resultMove });
+    res.json({ result: false, error: resultCloudinary });
   }
 });
 

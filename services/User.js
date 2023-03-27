@@ -36,7 +36,14 @@ const signin = async (email, password) => {
   }
 };
 
-const completeProfile = async (token, gender, photo, birthDate, description, favoriteSports) => UserEntity.updateUserByToken(token, gender, photo, birthDate, description, favoriteSports);
+const completeProfile = async (
+  token,
+  gender,
+  photo,
+  birthDate,
+  description,
+  favoriteSports,
+) => UserEntity.updateUserByToken(token, gender, photo, birthDate, description, favoriteSports);
 
 const joinGroup = async (token, groupId, status) => {
   const userData = await UserEntity.findUserByTokenAndGroupId(token, groupId);
@@ -56,9 +63,13 @@ const leaveGroup = async (token, groupId) => {
 
 const getUserGroupsInformation = async (token) => UserEntity.findUserByToken(token);
 
-const getUserGroupStatus = async (token, groupId) => UserEntity.findUserByTokenAndGroupId(token, groupId);
+const getUserGroupStatus = async (token, groupId) => {
+  UserEntity.findUserByTokenAndGroupId(token, groupId);
+};
 
-const addProfilePicture = async (token, photo) => UserEntity.updateUserProfilePictureByToken(token, photo);
+const addProfilePicture = async (token, photo) => {
+  UserEntity.updateUserProfilePictureByToken(token, photo);
+};
 
 module.exports = {
   signup,

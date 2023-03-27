@@ -8,15 +8,57 @@ const router = express.Router();
 
 router.post('/create', async (req, res) => {
   const {
-    token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status,
+    token,
+    photo,
+    name,
+    sport,
+    maxMembers,
+    genders,
+    levels,
+    ageMin,
+    ageMax,
+    description,
+    label,
+    latitude,
+    longitude,
+    status,
   } = req.body;
 
-  if (!token || !photo || !name || !sport || !maxMembers || !genders || !levels || !ageMin || !ageMax || !description || !label || !latitude || !longitude) {
+  if (
+    !token
+    || !photo
+    || !name
+    || !sport
+    || !maxMembers
+    || !genders
+    || !levels
+    || !ageMin
+    || !ageMax
+    || !description
+    || !label
+    || !latitude
+    || !longitude
+  ) {
     res.json({ result: false, error: 'Missing or empty fields.' });
     return;
   }
 
-  const newGroupData = await GroupService.createGroup(token, photo, name, sport, maxMembers, genders, levels, ageMin, ageMax, description, label, latitude, longitude, status);
+  const newGroupData = await GroupService.createGroup(
+    token,
+    photo,
+    name,
+    sport,
+    maxMembers,
+    genders,
+    levels,
+    ageMin,
+    ageMax,
+    description,
+    label,
+    latitude,
+    longitude,
+    status,
+  );
 
   if (newGroupData) {
     res.json({ result: true, message: 'New group created successfully.', data: newGroupData });
@@ -28,7 +70,10 @@ router.post('/create', async (req, res) => {
 router.get('/search', async (req, res) => {
   const { sport, latitude, longitude } = req.query;
 
-  if ((!sport && !latitude && !longitude) || ((latitude || longitude) && (!latitude || !longitude))) {
+  if (
+    (!sport && !latitude && !longitude)
+    || ((latitude || longitude) && (!latitude || !longitude))
+  ) {
     res.json({ result: false, error: 'Missing or empty fields.' });
     return;
   }
@@ -93,7 +138,7 @@ router.post('/upload', async (req, res) => {
   if (resultCloudinary) {
     res.json({ result: true, url: resultCloudinary.secure_url });
   } else {
-    res.json({ result: false, error: resultMove });
+    res.json({ result: false, error: resultCloudinary });
   }
 });
 

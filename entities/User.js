@@ -18,7 +18,14 @@ const findUserByToken = async (token) => User.findOne({ token })
 
 const findUsersByGroupId = async (groupId) => User.find({ 'registrations.group': groupId });
 
-const updateUserByToken = async (token, gender, photo, birthDate, description, favoriteSports) => User.updateOne(
+const updateUserByToken = async (
+  token,
+  gender,
+  photo,
+  birthDate,
+  description,
+  favoriteSports,
+) => User.updateOne(
   { token },
   {
     gender,
